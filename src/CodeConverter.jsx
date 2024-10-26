@@ -8,6 +8,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { DarkMode, LightMode, ContentCopy } from '@mui/icons-material';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import { Button, IconButton } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
+import { SpeedDial, SpeedDialAction } from '@mui/material';
+import ThemeIcon from '@mui/icons-material/Brightness4';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+
+
 const useShikiMonaco = () => {
   const [isReady, setIsReady] = useState(false);
   const highlighterRef = useRef(null);
@@ -299,6 +306,15 @@ const handleCopy = (code, fieldType) => {
                     ))}
                   </MenuItems>
                 </Menu>
+                
+                <IconButton
+                  onClick={() => setInputCode('')}
+                  aria-label="clear input"
+                  className="ml-2 mb-4"
+                  style={{ backgroundColor: isDarkMode ? '#555' : '#f1f1f1', borderRadius: '50%' }}
+                >
+                  <ClearIcon />
+                </IconButton>
 
                 <button
                   className="ml-5 mb-4 bg-gray-500 text-white rounded-md flex items-center justify-center"
@@ -433,6 +449,30 @@ const handleCopy = (code, fieldType) => {
           </div>
         </>
       }
+
+      <SpeedDial
+      ariaLabel="Action menu"
+      icon={<ThemeIcon />}
+      direction="up"
+      sx={{ position: 'fixed', bottom: 16, right: 16 }}
+      >
+      <SpeedDialAction
+        icon={<ClearIcon />}
+        tooltipTitle="Clear Input"
+        onClick={() => setInputCode('')}
+      />
+      <SpeedDialAction
+        icon={<ContentCopyIcon />}
+        tooltipTitle="Copy Input Code"
+        onClick={() => handleCopy(inputCode, 'Input')}
+      />
+      <SpeedDialAction
+        icon={<ThemeIcon />}
+        tooltipTitle="Toggle Theme"
+        onClick={toggleTheme}
+      />
+      </SpeedDial>
+
       <ToastContainer /> {/* Add ToastContainer to render toasts */}
       <style>
         {`
