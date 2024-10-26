@@ -13,6 +13,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { SpeedDial, SpeedDialAction } from '@mui/material';
 import ThemeIcon from '@mui/icons-material/Brightness4';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Hidden from '@mui/material/Hidden';
 
 
 const useShikiMonaco = () => {
@@ -72,6 +73,7 @@ const CodeConverter = () => {
   const [inputLang, setInputLang] = useState('python');
   const [outputLang, setOutputLang] = useState('javascript');
   const [loading, setLoading] = useState(false);
+  const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false); // Add state for SpeedDial open/close
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { isReady } = useShikiMonaco();
 
@@ -230,6 +232,11 @@ const handleCopy = (code, fieldType) => {
     return <div>Loading editor...</div>;
   }
 
+  const toggleSpeedDial = () => {
+    setIsSpeedDialOpen((prev) => !prev);
+  };
+
+
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
@@ -250,13 +257,15 @@ const handleCopy = (code, fieldType) => {
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen space-y-6 `}>
       <div className="flex justify-end items-center w-full p-4">
-        <button onClick={toggleTheme}>
-          {isDarkMode ? (
-            <LightMode className="text-yellow-400 text-xl" />
-          ) : (
-            <DarkMode className="text-white text-xl" />
-          )}
-        </button>
+        <Hidden only={['xs']}>
+          <button onClick={toggleTheme}>
+            {isDarkMode ? (
+              <LightMode className="text-yellow-400 text-xl" />
+            ) : (
+              <DarkMode className="text-white text-xl" />
+            )}
+          </button>
+        </Hidden>
       </div>
       {
         <>
@@ -306,28 +315,39 @@ const handleCopy = (code, fieldType) => {
                     ))}
                   </MenuItems>
                 </Menu>
-                
-                <IconButton
-                  onClick={() => setInputCode('')}
-                  aria-label="clear input"
-                  className="ml-2 mb-4"
-                  style={{ backgroundColor: isDarkMode ? '#555' : '#f1f1f1', borderRadius: '50%' }}
-                >
-                  <ClearIcon />
-                </IconButton>
 
-                <button
-                  className="ml-5 mb-4 bg-gray-500 text-white rounded-md flex items-center justify-center"
-                  onClick={() => handleCopy(inputCode, 'Input')}
-                  style={{
-                    backgroundColor: '#42a4bd',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                  }}
-                >
-                  <ContentCopy /> {/* Add the copy icon */}
-                </button>
+                <Hidden only={['xs']}>
+                  <button
+                    className="ml-5 mb-4 bg-gray-500 text-white rounded-md flex items-center justify-center"
+                    onClick={() => setInputCode('')}
+                    aria-label="clear input"
+                    style={{
+                      backgroundColor: '#42a4bd', // Matches the Copy button color
+                      width: '40px', // Matches the Copy button's width
+                      height: '40px', // Matches the Copy button's height
+                      borderRadius: '10px', // Matches the Copy button's border radius
+
+                    }}
+                  >
+                    <ClearIcon />
+                  </button>
+                </Hidden>
+
+
+                <Hidden only={['xs']}>
+                  <button
+                    className="ml-5 mb-4 bg-gray-500 text-white rounded-md flex items-center justify-center"
+                    onClick={() => handleCopy(inputCode, 'Input')}
+                    style={{
+                      backgroundColor: '#42a4bd',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                    }}
+                  >
+                    <ContentCopy /> {/* Add the copy icon */}
+                  </button>
+                </Hidden>
               </div>
 
               <Editor
@@ -450,28 +470,42 @@ const handleCopy = (code, fieldType) => {
         </>
       }
 
-      <SpeedDial
-      ariaLabel="Action menu"
-      icon={<ThemeIcon />}
-      direction="up"
-      sx={{ position: 'fixed', bottom: 16, right: 16 }}
-      >
-      <SpeedDialAction
-        icon={<ClearIcon />}
-        tooltipTitle="Clear Input"
-        onClick={() => setInputCode('')}
-      />
-      <SpeedDialAction
-        icon={<ContentCopyIcon />}
-        tooltipTitle="Copy Input Code"
-        onClick={() => handleCopy(inputCode, 'Input')}
-      />
-      <SpeedDialAction
-        icon={<ThemeIcon />}
-        tooltipTitle="Toggle Theme"
-        onClick={toggleTheme}
-      />
-      </SpeedDial>
+      <Hidden only={['md', 'lg', 'xl']}>
+        <SpeedDial
+          ariaLabel="Action menu"
+          icon={<ThemeIcon />}
+          direction="up"
+          sx={{ position: 'fixed', bottom: 16, right: 16 }}
+          open={isSpeedDialOpen} // Control open state with isSpeedDialOpen
+          onClick={toggleSpeedDial} // Toggle open state on click
+        >
+          <SpeedDialAction
+            icon={<ClearIcon />}
+            tooltipTitle="Clear Input"
+            onClick={() => {
+              setInputCode('');
+              toggleSpeedDial(); // Close after action
+            }}
+          />
+          <SpeedDialAction
+            icon={<ContentCopyIcon />}
+            tooltipTitle="Copy Input Code"
+            onClick={() => {
+              handleCopy(inputCode, 'Input');
+              toggleSpeedDial(); // Close after action
+            }}
+          />
+          <SpeedDialAction
+            icon={<ThemeIcon />}
+            tooltipTitle="Toggle Theme"
+            onClick={() => {
+              toggleTheme();
+              toggleSpeedDial(); // Close after action
+            }}
+          />
+        </SpeedDial>
+      </Hidden>
+
 
       <ToastContainer /> {/* Add ToastContainer to render toasts */}
       <style>
