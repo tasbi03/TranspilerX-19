@@ -6,7 +6,7 @@ import { shikiToMonaco } from '@shikijs/monaco';
 import { createHighlighter } from 'shiki';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { DarkMode, LightMode, ContentCopy } from '@mui/icons-material';
+import { DarkMode, LightMode, ContentCopy, FileCopyOutlined } from '@mui/icons-material';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { Button, IconButton } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -203,30 +203,33 @@ const CodeConverter = () => {
     }
   };
 
-const handleCopy = (code, fieldType) => {
-  if (!code || !code.trim()) {
-    toast.error(`${fieldType} field is empty!`, {
-      position: 'top-right',
-      className: isDarkMode ? 'dark-toast' : '',
-      autoClose: 2000,
+  const handleCopy = (code, fieldType) => {
+    if (!code || !code.trim()) {
+      toast.error(`${fieldType} field is empty!`, {
+        position: 'top-right',
+        className: isDarkMode ? 'dark-toast' : '',
+        autoClose: 2000,
+      });
+      return;
+    }
+  
+    navigator.clipboard.writeText(code).then(() => {
+      // Display different messages based on fieldType
+      const message = fieldType === 'Input' ? 'Input code copied!' : 'Output code copied!';
+      toast.success(message, {
+        autoClose: 2000,
+        className: isDarkMode ? 'dark-toast' : '',
+        position: 'top-right',
+      });
+    }).catch(err => {
+      console.error('Error copying text:', err);
+      toast.error('Failed to copy!', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
     });
-    return;
-  }
-
-  navigator.clipboard.writeText(code).then(() => {
-    toast.success('Copied!', {
-      autoClose: 2000,
-      className: isDarkMode ? 'dark-toast' : '',
-      position: 'top-right',
-    });
-  }).catch(err => {
-    console.error('Error copying text:', err);
-    toast.error('Failed to copy!', {
-      position: 'top-right',
-      autoClose: 2000,
-    });
-  });
-};
+  };
+  
 
   if (!isReady) {
     return <div>Loading editor...</div>;
@@ -414,18 +417,20 @@ const handleCopy = (code, fieldType) => {
                   </MenuItems>
                 </Menu>
 
-                <button
-                  className="ml-5 mb-4 bg-gray-500 text-white rounded-md flex items-center justify-center"
-                  onClick={() => handleCopy(outputCode, 'Output')}
-                  style={{
-                    backgroundColor: '#42a4bd',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                  }}
-                >
-                  <ContentCopy /> {/* Add the copy icon */}
-                </button>
+                <Hidden only={['xs']}>
+                  <button
+                    className="ml-5 mb-4 bg-gray-500 text-white rounded-md flex items-center justify-center"
+                    onClick={() => handleCopy(outputCode, 'Output')}
+                    style={{
+                      backgroundColor: '#42a4bd',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                    }}
+                  >
+                    <ContentCopy /> {/* Add the copy icon */}
+                  </button>
+                </Hidden>
               </div>
               <div className="relative h-[400px]">
                 <Editor
@@ -488,7 +493,15 @@ const handleCopy = (code, fieldType) => {
             }}
           />
           <SpeedDialAction
-            icon={<ContentCopyIcon />}
+            icon={<ContentCopyIcon />} // Standard copy icon
+            tooltipTitle="Copy Output Code" // Different tooltip for Output
+            onClick={() => {
+              handleCopy(outputCode, 'Output');
+              toggleSpeedDial(); // Close after action
+            }}
+          />
+          <SpeedDialAction
+            icon={<FileCopyOutlined />} // Alternative icon for Input Copy
             tooltipTitle="Copy Input Code"
             onClick={() => {
               handleCopy(inputCode, 'Input');
